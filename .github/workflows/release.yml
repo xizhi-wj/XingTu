@@ -20,7 +20,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Generate changelog
         id: create_release
@@ -62,7 +62,7 @@ jobs:
       - uses: pnpm/action-setup@v3
         with:
           version: latest
-          
+
       - name: Setup npm registry
         run: pnpm config set strict-ssl false
 
@@ -86,7 +86,7 @@ jobs:
       - name: Sync node version and setup cache
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - name: Install app dependencies and build web

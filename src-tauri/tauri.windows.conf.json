@@ -9,6 +9,13 @@
         ],
         "installMode": "both"
       }
-    }
+    },
+    "resources": [
+      "assets/logo.png",
+      "assets/logo-mac.png",
+      "assets/tray.png",
+      "assets/bg.png",
+      "resources/python"
+    ]
   }
 }
