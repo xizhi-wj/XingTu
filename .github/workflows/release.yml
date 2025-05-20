@@ -78,16 +78,13 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri -> target
+          workspaces: target
 
       - name: Sync node version and setup cache
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-
-      - name: Setup npm registry
-        run: pnpm config set strict-ssl false
 
       - name: Install app dependencies and build web
         run: pnpm install --frozen-lockfile
@@ -102,7 +99,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 星图 ${{ github.ref_name }}
+          releaseName: 星图 ${{ needs.create-release.outputs.APP_VERSION }}
           releaseBody: ''
           releaseDraft: true
           prerelease: false
