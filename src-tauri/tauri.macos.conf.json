@@ -1,0 +1,32 @@
+{
+  "identifier": "com.xingzhi.xingtu",
+  "bundle": {
+    "resources": [
+      "assets/logo.png",
+      "assets/logo-mac.png",
+      "assets/tray.png",
+      "assets/bg.png",
+      "resources/python"
+    ],
+    "macOS": {
+      "dmg": {
+        "appPosition": {
+          "x": 180,
+          "y": 170
+        },
+        "applicationFolderPosition": {
+          "x": 480,
+          "y": 170
+        },
+        "windowSize": {
+          "height": 400,
+          "width": 711
+        },
+        "background": "assets/bg.png"
+      },
+      "files": {},
+      "hardenedRuntime": true,
+      "minimumSystemVersion": "10.13"
+    }
+  }
+}

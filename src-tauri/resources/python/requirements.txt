@@ -1,0 +1,18 @@
+# Pillow==11.1.0
+# pillow-avif-plugin==1.5.1
+# rembg==2.0.65
+# onnxruntime==1.21.0
+# argparse==1.4.0
+# requests==2.32.3 
+# py7zr==0.22.0
+# tqdm==4.67.1
+# pillow-heif==0.22.0
+Pillow==11.1.0
+pillow-avif-plugin==1.5.1
+rembg==2.0.65
+onnxruntime==1.21.0
+argparse==1.4.0
+requests==2.32.3 
+py7zr==0.22.0
+tqdm==4.67.1
+pillow-heif==0.22.0

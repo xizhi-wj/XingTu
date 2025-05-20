@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "星图",
+  "version": "../package.json",
+  "identifier": "com.xingzhi.xingtu",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "macOSPrivateApi": true,
+    "windows": [
+      {
+        "title": "星图",
+        "width": 1200,
+        "height": 800,
+        "dragDropEnabled": false,
+        "transparent": true,
+        "hiddenTitle": true,
+        "resizable": false,
+        "maximizable": false,
+        "titleBarStyle": "Overlay"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis",
+      "dmg",
+      "app",
+      "appimage",
+      "deb",
+      "rpm"
+    ],
+    "category": "Utility",
+    "createUpdaterArtifacts": true,
+    "shortDescription": "XingTu",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": [
+      "resources/**"
+    ]
+  },
+  "plugins": {
+    "shell": {
+      "open": true
+    },
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ0Mzc3NDAyNzdBQjlBN0YKUldSL21xdDNBblEzMU4vRFJ5cTJjTzJsYjZyT2R6TFZJdytmLzYwamhxVXZTczdCUW5MWjBrUDkK",
+      "endpoints": [
+        "https://img.hoshinagi.top/xingtu/latest.json"
+      ]
+    }
+  }
+}

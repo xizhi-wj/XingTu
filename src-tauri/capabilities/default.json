@@ -1,0 +1,65 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": [
+    "main",
+    "setting"
+  ],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "dialog:default",
+    "shell:default",
+    "core:webview:allow-create-webview-window",
+    "core:window:allow-show",
+    {
+      "identifier": "shell:allow-spawn",
+      "allow": [
+        {
+          "name": "xingtu",
+          "cmd": "$RESOURCE/resources/XingTu-core/XingTu-core",
+          "args": [
+            "-b",
+            {
+              "validator": "*"
+            }
+          ]
+        }
+      ]
+    },
+    "os:default",
+    "fs:default",
+    {
+      "identifier": "fs:allow-resource-write",
+      "allow": [
+        {
+          "path": "$RESOURCE/resources/*"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        {
+          "path": "$RESOURCE/**"
+        },
+        {
+          "path": "$PICTURE/**"
+        },
+        {
+          "path": "$HOME/.u2net/**"
+        }
+      ]
+    },
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://*.hoshinagi.top"
+        }
+      ]
+    },
+    "updater:default"
+  ]
+}
