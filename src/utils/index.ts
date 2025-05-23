@@ -1,7 +1,7 @@
 import { path } from '@tauri-apps/api'
 import { arch, type } from '@tauri-apps/plugin-os'
 import { Command } from '@tauri-apps/plugin-shell'
-import { writeFile, remove, rename, exists } from '@tauri-apps/plugin-fs'
+import { writeFile, remove, rename, exists, mkdir } from '@tauri-apps/plugin-fs'
 import { Message } from '@arco-design/web-vue'
 import appStore from '@/store'
 import { invoke } from '@tauri-apps/api/core'
@@ -43,8 +43,12 @@ export const getResourcePath = () => {
   return new Promise<string>(async (resolve, reject) => {
     try {
       const resPath = await path.resourceDir()
-      const p = await path.join(resPath, 'resources')
-      resolve(p)
+      const resourcesPath = await path.join(resPath, 'resources')
+      // 检查目录是否存在，不存在则创建
+      if (!(await exists(resourcesPath))) {
+        await mkdir(resourcesPath, { recursive: true })
+      }
+      resolve(resourcesPath)
     } catch (error) {
       reject(error)
     }
@@ -135,7 +139,7 @@ export const download_xingtu_core = async () => {
       }
       const downloadUrl = xingtuCoreDict[platformToDownload as keyof typeof xingtuCoreDict]
 
-      store.log.push(`正在下载XingTu-core,下载地址: ${downloadUrl}`)
+      store.log.push('正在下载XingTu-core，请确保下载完成后在使用应用中的工具')
 
       const res = await axios({
         url: downloadUrl,
@@ -151,9 +155,10 @@ export const download_xingtu_core = async () => {
           }
         }
       })
-      store.log.push('下载完成，正在进行解压')
-      const zipFilePath = await path.join(resourcePath, 'XingTu-core.zip')
+      store.log.push('下载完成，正在进行保存')
+      const zipFilePath = await path.join(resourcePath, `${downloadUrl.split('/').pop()}`)
       await writeFile(zipFilePath, res.data)
+      store.log.push('文件保存到 ' + zipFilePath + '，正在进行解压')
       await invoke('extract_zip', {
         zipPath: zipFilePath,
         outputDir: resourcePath
@@ -176,50 +181,69 @@ export const download_xingtu_core = async () => {
 
 export const getFileInputPath = async (file: File) => {
   const resourcePath = await getResourcePath()
-  const tempFilePath = await path.join(resourcePath, file.name)
+  const tempPath = await path.join(resourcePath, 'temp')
+  if (!(await exists(tempPath))) {
+    await mkdir(tempPath, {
+      recursive: true
+    })
+  }
+  const tempFilePath = await path.join(tempPath, file.name)
   await writeFile(tempFilePath, new Uint8Array(await file.arrayBuffer()))
   return tempFilePath
 }
 
 export const run_xingtu_script = (imageItem: ImageItem, config: XingTuConfig) => {
-  return new Promise<boolean>(async (resolve, reject) => {
+  let tempFilePath = ''
+  return new Promise<boolean>(async (resolve, _reject) => {
     try {
-      // 判断输出路径是否存在
       imageItem.status = '正在处理'
       imageItem.complete_status = 1
       store.log.push('正在进行图片处理: ' + imageItem.name)
-      const tempFilePath = await getFileInputPath(imageItem.raw)
+      tempFilePath = await getFileInputPath(imageItem.raw)
       const configJson = JSON.stringify(config)
       const configBase64 = btoa(String.fromCharCode(...new TextEncoder().encode(configJson)))
       const command = Command.create('xingtu', ['-b', configBase64])
-      command.stdout.addListener('data', (data) => {
-        console.log(data)
-        store.log.push(data.toString())
-      })
-      command.stderr.addListener('data', (_data) => {
-        if (_data.startsWith('OMP:')) {
-          return
-        }
-        console.log(_data.toString())
-        store.log.push(_data.toString())
-      })
-      command.addListener('close', () => {
-        imageItem.is_completed = true
-        imageItem.complete_status = 2
-        imageItem.status = '已完成'
-        // 删除临时文件
-        tempFilePath && remove(tempFilePath)
-        store.log.push(`图片处理完成: ${imageItem.name}`)
-        resolve(true)
-      })
-      command.spawn().catch((error) => {
-        store.log.push('命令执行失败: ' + error)
-        resolve(false)
-      })
+      // 更新了一下依赖就导致使用spawn无法监听到程序的输出和错误，也无法监听到程序是否退出了，无奈只能使用execute了
+      // command.stdout.addListener('data', (data) => {
+      //   console.log(data)
+      //   store.log.push(data.toString())
+      // })
+      // command.stderr.addListener('data', (_data) => {
+      //   if (_data.startsWith('OMP:')) {
+      //     return
+      //   }
+      //   console.log(_data.toString())
+      //   store.log.push(_data.toString())
+      // })
+      // command.addListener('close', () => {
+      //   imageItem.is_completed = true
+      //   imageItem.complete_status = 2
+      //   imageItem.status = '已完成'
+      //   // 删除临时文件
+      //   tempFilePath && remove(tempFilePath)
+      //   store.log.push(`图片处理完成: ${imageItem.name}`)
+      //   resolve(true)
+      // })
+      // command.spawn().catch((error) => {
+      //   store.log.push('命令执行失败: ' + error)
+      //   resolve(false)
+      // })
+      const result = await command.execute()
+      store.log.push(result.stdout.toString())
+      if (!result.stderr.startsWith('OMP:')) {
+        store.log.push(result.stderr.toString())
+      }
+      imageItem.is_completed = true
+      imageItem.complete_status = 2
+      imageItem.status = '已完成'
+      store.log.push(`图片处理完成: ${imageItem.name}`)
+      resolve(true)
     } catch (error) {
-      console.log(error)
       store.log.push('图片处理失败' + error)
-      reject(error)
+      resolve(false)
+    } finally {
+      // 删除临时文件
+      tempFilePath && remove(tempFilePath)
     }
   })
 }

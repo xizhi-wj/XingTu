@@ -28,6 +28,21 @@
         }
       ]
     },
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "xingtu",
+          "cmd": "$RESOURCE/resources/XingTu-core/XingTu-core",
+          "args": [
+            "-b",
+            {
+              "validator": "*"
+            }
+          ]
+        }
+      ]
+    },
     "os:default",
     "fs:default",
     {

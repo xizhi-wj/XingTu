@@ -116,6 +116,8 @@ a {
   transition: all 0.3s ease 0s;
   overflow-wrap: break-word;
   -webkit-user-drag: none;
+  width: fit-content;
+  border: none;
 
   &:hover {
     color: var(--xz-white);

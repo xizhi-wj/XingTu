@@ -27,7 +27,7 @@ onMounted(async () => {
   // 添加全局事件监听器
   document.addEventListener('dragover', preventDefault)
   document.addEventListener('drop', preventDefault)
-  // document.addEventListener('contextmenu', preventDefault)
+  document.addEventListener('contextmenu', preventDefault)
   const theme = localStorage.getItem('theme') || 'light'
   document.documentElement.setAttribute('data-theme', theme)
   theme === 'dark'

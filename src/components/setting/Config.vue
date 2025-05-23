@@ -141,8 +141,8 @@ path.appLocalDataDir().then((dir: string) => {
 })
 
 path.resourceDir().then(async (dir: string) => {
-  settingConfig.xingtuCorePath = await path.join(dir, 'XingTu-core')
-  settingConfig.xingtuModelPath = await path.join(dir, 'XingTu-core', 'cache_models')
+  settingConfig.xingtuCorePath = await path.join(dir, 'resources', 'XingTu-core')
+  settingConfig.xingtuModelPath = await path.join(dir, 'resources', 'XingTu-core', 'cache_models')
 })
 
 path.homeDir().then((dir: string) => {
