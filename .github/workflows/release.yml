@@ -102,7 +102,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 星图 ${{ needs.create-release.outputs.APP_VERSION }}
+          releaseName: XingTu ${{ needs.create-release.outputs.APP_VERSION }}
           releaseBody: ''
           releaseDraft: true
           prerelease: false
