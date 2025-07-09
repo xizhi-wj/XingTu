@@ -236,6 +236,7 @@ const getTagColor = (status: string) => {
 
 const handleReset = () => {
   koutuItems.value = []
+  isProcessingAll.value = false
 }
 
 const handleSelectOutputPath = async () => {

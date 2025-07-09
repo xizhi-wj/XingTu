@@ -7,7 +7,7 @@
       </KeepAlive>
     </router-view>
     <a-modal hide-cancel v-model:visible="visible">
-      <template #title>正在下载核心文件，可关闭此窗口在运行日志中查看下载进度 </template>
+      <template #title>正在下载核心文件，可关闭此窗口在运行日志中查看是否下载完毕 </template>
       <div class="log-list not-fullscreen">
         <div class="log-item" v-for="item in store.log" :key="item">{{ item }}</div>
       </div>

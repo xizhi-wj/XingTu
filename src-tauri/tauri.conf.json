@@ -14,8 +14,8 @@
     "windows": [
       {
         "title": "星图",
-        "width": 1200,
-        "height": 800,
+        "width": 1100,
+        "height": 700,
         "dragDropEnabled": false,
         "transparent": true,
         "hiddenTitle": true,

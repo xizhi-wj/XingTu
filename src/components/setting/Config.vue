@@ -75,18 +75,6 @@
         </a-tooltip>
       </div>
     </div> -->
-    <div class="box">
-      <div class="title">应用</div>
-      <div class="config-item">
-        <div class="row">
-          <a-tooltip
-            content="重新安装XingTu-Core和Final2x-Core，一般在应用出了问题的时候使用，在重新初始化过程中再次点击按钮会弹出当前初始化进度框"
-          >
-            <xz-button @click="handleReset" type="danger" text="环境初始化"></xz-button>
-          </a-tooltip>
-        </div>
-      </div>
-    </div>
     <a-modal hide-cancel v-model:visible="visible">
       <template #title> 正在重置环境，请勿关闭当前窗口 </template>
       <div class="log-list">
@@ -98,7 +86,6 @@
 
 <script setup lang="ts">
 import appStore from '@/store'
-import { message, resetEnv } from '@/utils'
 import { path } from '@tauri-apps/api'
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { reactive, ref } from 'vue'
@@ -108,8 +95,6 @@ const store = appStore()
 const theme = ref(localStorage.getItem('theme') || 'light')
 
 const visible = ref(false)
-
-const isResetting = ref(false)
 
 const themeList = [
   {
@@ -155,28 +140,6 @@ const handleChangeTheme = (value: string) => {
   // 通知主窗口切换主题
   const win = getCurrentWebviewWindow()
   win.emit('change-theme', value)
-}
-
-const handleReset = async () => {
-  if (isResetting.value) {
-    visible.value = true
-    return
-  }
-  isResetting.value = true
-  visible.value = true
-  store.log.push('正在重置环境...')
-  const isReset = await resetEnv()
-  console.log(isReset)
-  if (isReset) {
-    store.log.push('环境重置成功')
-  }
-  isResetting.value = false
-  message({
-    content: '环境重置成功'
-  })
-  setTimeout(() => {
-    visible.value = false
-  }, 3000)
 }
 </script>
 

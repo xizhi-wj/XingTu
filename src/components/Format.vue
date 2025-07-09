@@ -238,6 +238,7 @@ const mapToformatItem = (files: File[]) => {
 
 const handleReset = () => {
   formatItems.value = []
+  isProcessingAll.value = false
 }
 
 const handleSelectOutputPath = async () => {

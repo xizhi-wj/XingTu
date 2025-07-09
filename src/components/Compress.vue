@@ -275,6 +275,7 @@ const handleReset = () => {
   compressItems.value = []
   compressConfig.quality = 85
   compressConfig.format = 'png'
+  isProcessingAll.value = false
 }
 
 const handleSelectOutputPath = async () => {

@@ -196,6 +196,7 @@ const handleReset = () => {
   currentImage.value = null
   currentIndex.value = 0
   sliderPosition.value = 50
+  isProcessing.value = false
 }
 
 const mapToformatItem = (files: File[]) => {

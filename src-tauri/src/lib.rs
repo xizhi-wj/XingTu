@@ -1,10 +1,12 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
 use std::fs::File;
-use std::io::Write;
+use std::io::{Write};
 use std::path::PathBuf;
 use std::path::Path;
 use tauri::command;
+use reqwest;
+use std::fs;
 
 
 #[command]
@@ -53,6 +55,11 @@ async fn delete_path(path: String) -> Result<bool, String> {
 
 #[command]
 async fn extract_zip(zip_path: String, output_dir: String) -> Result<bool, String> {
+    // 确保输出目录存在
+    if let Err(e) = fs::create_dir_all(&output_dir) {
+        return Err(format!("创建输出目录失败: {}", e));
+    }
+    
     let os_type = std::env::consts::OS;
     
     let status = match os_type {
@@ -72,7 +79,7 @@ async fn extract_zip(zip_path: String, output_dir: String) -> Result<bool, Strin
             // 在 Windows 上使用 PowerShell 的 Expand-Archive 命令
             let output = std::process::Command::new("powershell")
                 .arg("-Command")
-                .arg(format!("Expand-Archive -Path '{}' -DestinationPath '{}' -Force", zip_path, output_dir))
+                .arg(format!("Expand-Archive -Path \"{}\" -DestinationPath \"{}\" -Force", zip_path, output_dir))
                 .output()
                 .map_err(|e| e.to_string())?;
                 
@@ -92,6 +99,39 @@ async fn extract_zip(zip_path: String, output_dir: String) -> Result<bool, Strin
     }
 }
 
+#[command]
+async fn download_zip(url: String, save_path: String) -> Result<String, String> {
+    // 确保保存目录存在
+    if let Some(parent) = Path::new(&save_path).parent() {
+        if let Err(e) = fs::create_dir_all(parent) {
+            return Err(format!("创建保存目录失败: {}", e));
+        }
+    }
+    
+    // 发起 HTTP 请求下载文件
+    let response = reqwest::get(&url)
+        .await
+        .map_err(|e| format!("下载请求失败: {}", e))?;
+    
+    if !response.status().is_success() {
+        return Err(format!("下载请求失败，状态码: {}", response.status()));
+    }
+    
+    // 创建文件
+    let mut file = File::create(&save_path)
+        .map_err(|e| format!("创建文件失败: {}", e))?;
+    
+    // 将响应内容写入文件
+    let content = response.bytes()
+        .await
+        .map_err(|e| format!("读取响应内容失败: {}", e))?;
+    
+    file.write_all(&content)
+        .map_err(|e| format!("写入文件失败: {}", e))?;
+    
+    Ok(save_path)
+}
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -104,7 +144,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![save_image, delete_path, extract_zip])
+        .invoke_handler(tauri::generate_handler![save_image, delete_path, extract_zip, download_zip])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

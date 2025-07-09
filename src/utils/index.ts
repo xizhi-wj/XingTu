@@ -5,7 +5,6 @@ import { writeFile, remove, rename, exists, mkdir } from '@tauri-apps/plugin-fs'
 import { Message } from '@arco-design/web-vue'
 import appStore from '@/store'
 import { invoke } from '@tauri-apps/api/core'
-import axios from 'axios'
 
 const store = appStore()
 
@@ -121,7 +120,6 @@ export const download_xingtu_core = async () => {
   return new Promise<boolean>(async (resolve, reject) => {
     try {
       const resourcePath = await getResourcePath()
-      console.log('正在下载XingTu-core')
       store.log.push('正在下载XingTu-core')
       let platformToDownload = ''
 
@@ -140,37 +138,54 @@ export const download_xingtu_core = async () => {
       const downloadUrl = xingtuCoreDict[platformToDownload as keyof typeof xingtuCoreDict]
 
       store.log.push('正在下载XingTu-core，请确保下载完成后在使用应用中的工具')
-
-      const res = await axios({
-        url: downloadUrl,
-        method: 'GET',
-        responseType: 'arraybuffer',
-        onDownloadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percent = parseFloat(
-              ((progressEvent.loaded * 100) / progressEvent.total).toFixed(2)
-            )
-            console.log(percent)
-            store.log.push(`正在下载XingTu-core,当前下载进度: ${percent}%`)
-          }
-        }
-      })
-      store.log.push('下载完成，正在进行保存')
       const zipFilePath = await path.join(resourcePath, `${downloadUrl.split('/').pop()}`)
-      await writeFile(zipFilePath, res.data)
-      store.log.push('文件保存到 ' + zipFilePath + '，正在进行解压')
+      await invoke('download_zip', {
+        url: downloadUrl,
+        savePath: zipFilePath
+      })
+      store.log.push('下载完成，正在进行解压')
       await invoke('extract_zip', {
         zipPath: zipFilePath,
         outputDir: resourcePath
       })
       store.log.push('解压完成，正在进行后续处理')
-      // 从downloadUrl提取解压后的文件夹的名字
+      // 重命名
       const folderName = downloadUrl.split('/').pop()?.split('.')[0] || 'XingTu-core'
       const oldPath = await path.join(resourcePath, folderName)
       const newPath = await path.join(resourcePath, 'XingTu-core')
       await rename(oldPath, newPath)
       store.log.push('处理完成，XingTu-core安装完毕')
       resolve(true)
+      // const res = await axios({
+      //   url: downloadUrl,
+      //   method: 'GET',
+      //   responseType: 'arraybuffer',
+      //   onDownloadProgress: (progressEvent) => {
+      //     if (progressEvent.total) {
+      //       const percent = parseFloat(
+      //         ((progressEvent.loaded * 100) / progressEvent.total).toFixed(2)
+      //       )
+      //       console.log(percent)
+      //       store.log.push(`正在下载XingTu-core,当前下载进度: ${percent}%`)
+      //     }
+      //   }
+      // })
+      // store.log.push('下载完成，正在进行保存')
+      // const zipFilePath = await path.join(resourcePath, `${downloadUrl.split('/').pop()}`)
+      // await writeFile(zipFilePath, res.data)
+      // store.log.push('文件保存到 ' + zipFilePath + '，正在进行解压')
+      // await invoke('extract_zip', {
+      //   zipPath: zipFilePath,
+      //   outputDir: resourcePath
+      // })
+      // store.log.push('解压完成，正在进行后续处理')
+      // // 从downloadUrl提取解压后的文件夹的名字
+      // const folderName = downloadUrl.split('/').pop()?.split('.')[0] || 'XingTu-core'
+      // const oldPath = await path.join(resourcePath, folderName)
+      // const newPath = await path.join(resourcePath, 'XingTu-core')
+      // await rename(oldPath, newPath)
+      // store.log.push('处理完成，XingTu-core安装完毕')
+      // resolve(true)
     } catch (error) {
       console.log(error)
       store.log.push('XingTu-core下载或解压失败: ' + error)
@@ -240,6 +255,9 @@ export const run_xingtu_script = (imageItem: ImageItem, config: XingTuConfig) =>
       resolve(true)
     } catch (error) {
       store.log.push('图片处理失败' + error)
+      imageItem.is_completed = false
+      imageItem.complete_status = 0
+      imageItem.status = '失败'
       resolve(false)
     } finally {
       // 删除临时文件
@@ -257,22 +275,6 @@ export const checkEnv = () => {
       resolve(true)
     } else {
       store.log.push('XingTu-core未安装')
-      resolve(false)
-    }
-  })
-}
-
-export const resetEnv = () => {
-  // 删除虚拟环境
-  return new Promise<boolean>(async (resolve, _reject) => {
-    try {
-      const resourcePath = await getResourcePath()
-      // 删除xingtu-core
-      const xingtuCorePath = await path.join(resourcePath, 'XingTu-core')
-      await delete_path(xingtuCorePath)
-      resolve(true)
-    } catch (error) {
-      console.log(error)
       resolve(false)
     }
   })
